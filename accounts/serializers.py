@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from decouple import config
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import check_password
@@ -71,3 +71,43 @@ class PasswordChangeSerializer(serializers.Serializer):
 
         password_validation.validate_password(new_password, user=user)
         return data
+    
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("no account with this email found")
+        return value
+    
+    def save(self):
+          email = self.validated_data['email']
+          user = User.objects.get(email=email)
+
+          token = RefreshToken.for_user(user).access_token
+          reset_link = f"http://localhost:8000/api/accounts/reset-password-confirm/?token={str(token)}"
+
+          send_mail(
+               "Reset Your Password",
+               f"Click the link to reset your password: {reset_link}",
+               config('EMAIL_HOST_USER'),
+               [user.email],
+               fail_silently=False
+          )
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        try:
+            access_token = AccessToken(data['token'])
+            self.user_id = access_token['user_id']
+        except Exception:
+            raise serializers.ValidationError("Invalid or expired token.")
+        return data
+
+    def save(self):
+        user = User.objects.get(id=self.user_id)
+        user.set_password(self.validated_data['new_password'])
+        user.save()

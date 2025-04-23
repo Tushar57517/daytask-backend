@@ -4,7 +4,9 @@ from rest_framework import status
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
-    PasswordChangeSerializer
+    PasswordChangeSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer
 )
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.contrib.auth import get_user_model
@@ -15,7 +17,7 @@ from rest_framework.permissions import (
 
 User = get_user_model()
 
-class RegistetrView(APIView):
+class RegisterView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -88,3 +90,19 @@ class PasswordChangeView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class PasswordResetRequestView(APIView):
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Password reset link sent to email"}, status=200)
+        return Response(serializer.errors, status=400)
+
+class PasswordResetConfirmView(APIView):
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Password reset successful"}, status=200)
+        return Response(serializer.errors, status=400)
