@@ -3,7 +3,8 @@ from .views import (
     RegistetrView,
     VerifyEmailView,
     LoginView,
-    RefreshTokenView
+    RefreshTokenView,
+    PasswordChangeView
 )
 
 urlpatterns = [
@@ -11,4 +12,5 @@ urlpatterns = [
     path("verify-email/", VerifyEmailView.as_view(), name="verify-email"),
     path("login/", LoginView.as_view(), name="login"),
     path("refresh/", RefreshTokenView.as_view(), name="refresh"),
+    path("change-password/", PasswordChangeView.as_view(), name="change-password"),
 ]

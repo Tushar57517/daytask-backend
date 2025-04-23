@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import (
     RegisterSerializer,
-    LoginSerializer
+    LoginSerializer,
+    PasswordChangeSerializer
 )
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.contrib.auth import get_user_model
@@ -67,3 +68,23 @@ class RefreshTokenView(APIView):
         
         except Exception:
             return Response({"error":"Invalid or expired refresh token"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordChangeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = PasswordChangeSerializer(data=request.data, context = {'request':request})
+
+        if serializer.is_valid():
+            user = request.user
+            new_password = serializer.validated_data['new_password']
+            user.set_password(new_password)
+            user.save()
+
+            return Response(
+                {"message": "Password changed successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

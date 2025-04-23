@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from decouple import config
 from django.core.mail import send_mail
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth import password_validation
 
 User = get_user_model()
 
@@ -49,3 +51,23 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("incorrect password")
         
         return user
+    
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        user = self.context['request'].user
+
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+
+        if not user.check_password(old_password):
+            raise serializers.ValidationError({"old_password": "Incorrect old password."})
+        
+        if old_password == new_password:
+            raise serializers.ValidationError({"new_password": "New password must be different from the old one."})
+
+        password_validation.validate_password(new_password, user=user)
+        return data
