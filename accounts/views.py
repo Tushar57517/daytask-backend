@@ -14,6 +14,8 @@ from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated
 )
+from django.core.mail import send_mail
+from decouple import config
 
 User = get_user_model()
 
@@ -124,3 +126,24 @@ class LogoutView(APIView):
 
         except Exception as e:
             return Response({"error":"invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+        
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user_email = user.email
+
+        try:
+            send_mail(
+                    "Your account is deleted!",
+                    f"Your request for deleting your account is successful. Your data is removed from our service.",
+                    config('EMAIL_HOST_USER'),
+                    [user_email],
+                    fail_silently=False
+                )
+            user.delete()
+            return Response({"message":"account deleted successfully!"}, status=status.HTTP_204_NO_CONTENT)
+        
+        except Exception:
+            return Response({"error":"something went wrong while deleting the account."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
