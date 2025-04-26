@@ -1,4 +1,4 @@
-# SplitPay Backend
+# DayTask Backend
 
 ## Setup Instructions
 
