@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'accounts.apps.AccountsConfig'
+    'accounts.apps.AccountsConfig',
+    'chat.apps.ChatConfig',
 ]
 
 # Token Authentication Configuration
