@@ -85,3 +85,6 @@ test-results/
 *.bak
 *.swp
 *.tmp
+
+# === setup ===
+secret key
