@@ -8,6 +8,9 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from django.core.mail import send_mail
 from decouple import config
 from rest_framework_simplejwt.exceptions import TokenError
+from decouple import config
+
+BASE_URL=config('BACKEND_BASE_URL')
 
 User = get_user_model()
 
@@ -43,7 +46,7 @@ class RequestEmailUpdateView(APIView):
 
             token = RefreshToken.for_user(user).access_token
 
-            confirm_url = f'http://localhost:8000/api/profile/me/edit/email/confirm/?token={str(token)}&email={str(new_email)}'
+            confirm_url = f'{BASE_URL}/api/profile/me/edit/email/confirm/?token={str(token)}&email={str(new_email)}'
 
             send_mail(
                 'Confirm your new email address',
