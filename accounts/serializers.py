@@ -5,6 +5,9 @@ from decouple import config
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import password_validation
+from decouple import config
+
+BASE_URL=config('BACKEND_BASE_URL')
 
 User = get_user_model()
 
@@ -24,7 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         token = RefreshToken.for_user(user).access_token
-        verification_link = f"http://localhost:8000/api/accounts/verify-email/?token={str(token)}"
+        verification_link = f"{BASE_URL}/api/accounts/verify-email/?token={str(token)}"
 
         send_mail(
                 "Verify your Email",
@@ -85,7 +88,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
           user = User.objects.get(email=email)
 
           token = RefreshToken.for_user(user).access_token
-          reset_link = f"http://localhost:8000/api/accounts/reset-password-confirm/?token={str(token)}"
+          reset_link = f"{BASE_URL}/api/accounts/reset-password-confirm/?token={str(token)}"
 
           send_mail(
                "Reset Your Password",
